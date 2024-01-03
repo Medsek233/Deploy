@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Prompt for user input
+read -p "Enter your laravel app folder: " your_laravel_app_folder
 read -p "Enter your database name: " your_db_name
 read -p "Enter your database username: " user_name
 read -p "Enter your database user password: " password
@@ -38,5 +39,10 @@ sudo mysql -e "GRANT ALL ON $your_db_name.* TO '$user_name'@'%';"
 # Migrate the database
 echo "Running migrations..."
 php artisan migrate
+
+# Set ownership for Laravel storage and cache
+echo "Setting permissions for storage and cache..."
+sudo chown -R www-data:www-data /var/www/$your_laravel_app_folder/storage /var/www/$your_laravel_app_folder/bootstrap/cache
+sudo chmod -R 775 /var/www/$your_laravel_app_folder/storage /var/www/$your_laravel_app_folder/bootstrap/cache
 
 echo "Laravel project setup completed. Remember to switch the debug_mode and environment in your .env file if needed."
