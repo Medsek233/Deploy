@@ -2,8 +2,8 @@
 
 # Prompt for user input
 read -p "Enter your email for SSH key generation: " your_email
-read -p "Enter your GitHub username: " your_github_username
-read -p "Enter your repository name: " your_repo
+read -p "Enter your Git SSH remote URL: " your_ssh_remote_url
+read -p "Enter your GitHub repository name: " your_repo_name
 read -p "Enter your domain name: " your_domain
 
 # Update and install Nginx
@@ -23,15 +23,6 @@ sudo apt install mysql-server -y
 # Install PHP
 echo "Installing PHP and necessary extensions..."
 sudo apt install php8.1-fpm php-mysql -y
-
-# Configure Nginx to use PHP processor
-echo "Setting up directories for $your_domain..."
-sudo mkdir -p /var/www/$your_domain
-sudo chown -R $USER:$USER /var/www/$your_domain
-
-echo "Configuring Nginx for $your_domain..."
-sudo nano /etc/nginx/sites-available/$your_domain
-sudo ln -s /etc/nginx/sites-available/$your_domain /etc/nginx/sites-enabled/
 
 # Install Composer
 echo "Installing Composer..."
@@ -59,19 +50,18 @@ sudo apt install -y nodejs
 sudo npm install -g npm@8.19.4
 
 # Clone GitHub Repo
-echo "Cloning repository $your_repo..."
+echo "Cloning repository $your_ssh_remote_url..."
 cd /var/www
-git clone git@github.com:$your_github_username/$your_repo.git
+git clone $your_ssh_remote_url $your_repo_name
+
+echo "Configuring Nginx for $your_domain..."
+sudo nano /etc/nginx/sites-available/$your_repo_name
+sudo ln -s /etc/nginx/sites-available/$your_repo_name /etc/nginx/sites-enabled/
 
 # Set ownership for Laravel storage and cache
 echo "Setting permissions for storage and cache..."
-sudo chown -R www-data.www-data /var/www/$your_repo/storage
-sudo chown -R www-data.www-data /var/www/$your_repo/bootstrap/cache
-
-# Create Nginx config for cloned repo
-echo "Configuring Nginx for $your_repo..."
-sudo nano /etc/nginx/sites-available/$your_repo
-sudo ln -s /etc/nginx/sites-available/$your_repo /etc/nginx/sites-enabled/
+sudo chown -R www-data:www-data /var/www/$your_repo_name/storage /var/www/$your_repo_name/bootstrap/cache
+sudo chmod -R 775 /var/www/$your_repo_name/storage /var/www/$your_repo_name/bootstrap/cache
 
 # Test and reload Nginx
 echo "Testing Nginx configuration..."
