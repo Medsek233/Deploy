@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Prompt for user input
-read -p "Enter your email for SSH key generation: " your_email
 read -p "Enter your Git SSH remote URL: " your_ssh_remote_url
 read -p "Enter your GitHub repository name: " your_repo_name
 read -p "Enter your domain name: " your_domain
@@ -37,19 +36,13 @@ sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=compose
 echo "Installing additional PHP packages..."
 sudo apt install php-mbstring php-xml php-bcmath php-curl -y
 
-# Generate SSH key for GitHub
-echo "Generating SSH key..."
-ssh-keygen -t ed25519 -C "$your_email"
-echo "Please add the following SSH key to your GitHub deploy keys."
-cat ~/.ssh/id_rsa.pub
-
 # Install Node.js and npm
 echo "Installing Node.js and npm..."
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g npm@8.19.4
 
-# Clone GitHub Repo
+# Clone GitHub Repo assuming you already setup ssh key
 echo "Cloning repository $your_ssh_remote_url..."
 cd /var/www
 git clone $your_ssh_remote_url $your_repo_name
@@ -92,11 +85,6 @@ server {
 }
 EOF"
 sudo ln -s /etc/nginx/sites-available/$your_repo_name /etc/nginx/sites-enabled/
-
-# Set ownership for Laravel storage and cache
-echo "Setting permissions for storage and cache..."
-sudo chown -R www-data:www-data /var/www/$your_repo_name/storage /var/www/$your_repo_name/bootstrap/cache
-sudo chmod -R 775 /var/www/$your_repo_name/storage /var/www/$your_repo_name/bootstrap/cache
 
 # Test and reload Nginx
 echo "Testing Nginx configuration..."
